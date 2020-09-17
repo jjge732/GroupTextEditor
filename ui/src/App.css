@@ -35,12 +35,14 @@
   grid-template-columns: 25px 1fr;
 }
 
-.lineNumber {
+#lineNumberContainer {
   grid-column: 1;
+  grid-row: 1;
   background-color: palevioletred;
 }
 
 #editorElement {
   grid-column: 2;
+  grid-row: 1;
   outline: 0px solid transparent;
 }

@@ -21,14 +21,41 @@ class Editor extends React.Component {
     };
   }
 
-  enableTab(id: string) {
-    const element = document.getElementById(id);
+  getCursorPosition(element: Element): number {
+    const positionRange = document.createRange();
+    const selection = window.getSelection();
+    if (selection) {
+      console.log(document.activeElement)
+      const elementText = element.textContent;
+      console.log(elementText)
+      const lineNumber = 1;
+      const lineOffset = selection?.focusOffset;
+      positionRange.setStart(element, lineNumber); 
+      positionRange.collapse(true); 
+      selection.removeAllRanges();
+      selection.addRange(positionRange); 
+    } else {
+      console.log('There is not currently a selection on the window');
+    }
+    return 0;
+  }
+
+  getArrayOfLines(): Array<string> {
+    const textArr = this.state.html.replace(/<\/div>|<br>/g, '').split('<div>');
+    textArr.shift();
+    return textArr;
+  }
+
+  enableTab(elementId: string): void {
+    const element = document.getElementById(elementId);
     if (element) {
-      element.onkeydown = e => {
-          if (e.code === 'Tab') { // tab was pressed
-            e.preventDefault();
+      element.onkeydown = event => {
+          if (event.code === 'Tab') { // tab was pressed
+            event.preventDefault();
+            this.getCursorPosition(element)
             //TODO: fix so tab is added in the correct location
-            this.setState({html: `${this.state.html}${space.repeat(tabSpaceNbr)}`});
+            console.log(this.state.html)
+            // this.setState({html: `${this.state.html}${space.repeat(tabSpaceNbr)}`});
           }
       };
     }
@@ -47,9 +74,17 @@ focusLastLine(): void {
 }
 
 getNumberOfLines(): number {
-  //TODO: fix weirdness in line number
   const element = document.getElementById('editorElement')?.children.length;
   return element || 0 + 1;
+}
+
+generateLineNumbers(): Array<Element> {
+  const { numberLines } = this.state
+  const lineArray = new Array(numberLines);
+  for (let i = 0; i < numberLines; i++) {
+    lineArray[i] = <div className='lineNumber'>{i + 1}</div>;
+  }
+  return lineArray;
 }
 
 sanitize(input: string): string {
@@ -57,10 +92,9 @@ sanitize(input: string): string {
 }
 
 render() {
-  console.log(this.state.numberLines)
   return (
     <div id='editorContainer' onClick={this.focusLastLine} >
-      <span className='lineNumber'>{this.state.numberLines}</span>
+      <span id='lineNumberContainer'>{this.generateLineNumbers()}</span>
       <ContentEditable 
         id='editorElement' 
         innerRef={this.contentEditable} 
